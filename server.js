@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const { v4: uuidv4 } = require('uuid');
 const telegramService = require('./src/telegramService');
 const imageStore = require('./src/imageStore');
@@ -24,13 +25,34 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // For parsing form data
 app.use(express.static('public'));
 
-// Session middleware
-app.use(session({
-  secret: uuidv4(), // Use a random UUID as the session secret
+// Session middleware configuration
+const sessionConfig = {
+  secret: process.env.SESSION_SECRET || uuidv4(), // Use env variable or random UUID
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false, maxAge: 31536000000 } // 1 year session (365 days)
-}));
+  saveUninitialized: false, // Don't create sessions until something is stored
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production' && process.env.USE_HTTPS === 'true', // Only use secure cookies in production with HTTPS
+    maxAge: 31536000000, // 1 year session (365 days)
+    httpOnly: true, // Prevent XSS attacks
+    sameSite: 'lax' // CSRF protection
+  }
+};
+
+// Use MongoDB session store if MONGODB_URI is provided (recommended for production)
+if (process.env.MONGODB_URI) {
+  sessionConfig.store = MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions',
+    ttl: 365 * 24 * 60 * 60, // 1 year in seconds
+    autoRemove: 'native' // Let MongoDB handle expired session cleanup
+  });
+  console.log('Using MongoDB session store');
+} else {
+  console.warn('Warning: Using default MemoryStore for sessions. This is not recommended for production.');
+  console.warn('Set MONGODB_URI environment variable to use a production-ready session store.');
+}
+
+app.use(session(sessionConfig));
 
 // Authentication middleware for gallery access
 const requireAuth = (req, res, next) => {

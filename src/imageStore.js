@@ -15,6 +15,12 @@ const imagesFilePath = path.join(__dirname, '../data/images.json');
  */
 async function _getAllImagesRaw() {
   try {
+    // Ensure the data directory exists
+    const dataDir = path.dirname(imagesFilePath);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
     // Create images.json if it doesn't exist
     if (!fs.existsSync(imagesFilePath)) {
       fs.writeFileSync(imagesFilePath, JSON.stringify({ images: [] }));
