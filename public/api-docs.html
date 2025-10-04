@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TelegramPoto API Documentation</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --code-bg: #f5f5f5;
+            --code-border: #ddd;
+            --dark-gray: #333;
+            --light-gray: #f9f9f9;
+            --border-color: #eaeaea;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --warning-color: #f39c12;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            line-height: 1.6;
+            color: var(--dark-gray);
+            background-color: var(--light-gray);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background-color: var(--secondary-color);
+            padding: 10px 30px;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        nav li {
+            margin: 5px 15px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: opacity 0.3s;
+        }
+        
+        nav a:hover {
+            opacity: 0.8;
+        }
+        
+        main {
+            padding: 30px;
+        }
+        
+        section {
+            margin-bottom: 40px;
+        }
+        
+        section:last-child {
+            margin-bottom: 0;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        h3 {
+            color: var(--secondary-color);
+            margin: 25px 0 15px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        code {
+            background-color: var(--code-bg);
+            border: 1px solid var(--code-border);
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--code-border);
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        
+        .endpoint {
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        
+        .endpoint-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .method {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .get {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--primary-color);
+        }
+        
+        .post {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success-color);
+        }
+        
+        .delete {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--error-color);
+        }
+        
+        .endpoint-url {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .endpoint-body {
+            padding: 15px;
+            background-color: var(--light-gray);
+        }
+        
+        .params table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .params th, .params td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .params th {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .response-examples h4 {
+            margin: 15px 0 10px;
+            font-weight: 500;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            font-weight: 500;
+        }
+        
+        .tag-required {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--error-color);
+        }
+        
+        .tag-optional {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--primary-color);
+        }
+        
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        footer a {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        .try-it {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .try-it h4 {
+            margin-bottom: 10px;
+        }
+        
+        .try-it input, .try-it textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        
+        .try-it button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .try-it button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: var(--code-bg);
+            border-radius: 4px;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .endpoint-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .method {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TelegramPoto API Documentation</h1>
+            <p>Use Telegram as a free image CDN for your applications</p>
+        </header>
+        
+        <nav>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#authentication">Authentication</a></li>
+                <li><a href="#upload-image">Upload Image</a></li>
+                <li><a href="#get-image">Get Image</a></li>
+                <li><a href="#list-images">List Images</a></li>
+                <li><a href="#rate-limits">Rate Limiting</a></li>
+                <li><a href="#errors">Error Handling</a></li>
+                <li><a href="#examples">Code Examples</a></li>
+                <li><a href="/swagger.html" target="_blank">Swagger UI</a></li>
+            </ul>
+        </nav>
+        
+        <main>
+            <section id="introduction">
+                <h2>Introduction</h2>
+                <p>
+                    TelegramPoto is a RESTful API that allows you to use Telegram as a free image CDN. It provides endpoints for uploading images,
+                    retrieving them, and managing your image collection. All API responses are in JSON format, except for the image retrieval endpoint,
+                    which returns the image data directly.
+                </p>
+                <p>
+                    The base URL for all API endpoints is: <code>http://your-domain.com</code> (replace with your actual domain)
+                </p>
+                <p>
+                    The OpenAPI specification for this API is available at <a href="/openapi.json" target="_blank">/openapi.json</a>
+                </p>
+                <p>
+                    For interactive API documentation, you can use our <a href="/swagger.html" target="_blank">Swagger UI</a>
+                </p>
+            </section>
+            
+            <section id="authentication">
+                <h2>Authentication</h2>
+                <p>
+                    Currently, the API doesn't require authentication. However, for production use, it's recommended to implement your own
+                    authentication mechanism to protect your uploads.
+                </p>
+            </section>
+            
+            <section id="upload-image">
+                <h2>Upload Image</h2>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="method post">POST</div>
+                        <div class="endpoint-url">/upload</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Upload a new image to the CDN.</p>
+                        
+                        <h3>Request</h3>
+                        <p>The request must be a <code>multipart/form-data</code> request with an image file:</p>
+                        
+                        <div class="params">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>image <span class="tag tag-required">Required</span></td>
+                                        <td>File</td>
+                                        <td>The image file to upload. Must be a valid image (JPG, JPEG, or PNG) and less than 20MB.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>Response</h3>
+                        <p>On successful upload, the server will respond with a 201 Created status and the following JSON:</p>
+                        
+                        <div class="response-examples">
+                            <h4>Success Response (201 Created):</h4>
+                            <pre>{
+  "success": true,
+  "message": "Image uploaded successfully",
+  "imageId": "57f7cf6a-0b9d-4542-ae5c-a5f524df308e",
+  "cdnUrl": "/cdn/57f7cf6a-0b9d-4542-ae5c-a5f524df308e"
+}</pre>
+                        </div>
+                        
+                        <div class="try-it">
+                            <h4>Try it</h4>
+                            <form id="upload-form">
+                                <input type="file" id="image-input" accept="image/jpeg,image/jpg,image/png">
+                                <button type="submit">Upload</button>
+                                <div class="result" id="upload-result"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="get-image">
+                <h2>Get Image</h2>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="method get">GET</div>
+                        <div class="endpoint-url">/cdn/:id</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Retrieve an image by its ID.</p>
+                        
+                        <h3>Path Parameters</h3>
+                        <div class="params">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>id <span class="tag tag-required">Required</span></td>
+                                        <td>String</td>
+                                        <td>The unique ID of the image.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>Query Parameters</h3>
+                        <div class="params">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>size <span class="tag tag-optional">Optional</span></td>
+                                        <td>String</td>
+                                        <td>The desired size of the image: "small", "medium", or omit for original size.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>Response</h3>
+                        <p>Returns the binary image data with appropriate content type headers.</p>
+                        
+                        <div class="try-it">
+                            <h4>Try it</h4>
+                            <div>
+                                <input type="text" id="image-id" placeholder="Enter image ID">
+                                <select id="image-size">
+                                    <option value="">Original size</option>
+                                    <option value="small">Small</option>
+                                    <option value="medium">Medium</option>
+                                </select>
+                                <button id="get-image-btn">Get Image</button>
+                                <div class="result" id="image-result"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="list-images">
+                <h2>List Images</h2>
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <div class="method get">GET</div>
+                        <div class="endpoint-url">/images</div>
+                    </div>
+                    <div class="endpoint-body">
+                        <p>Get a list of all uploaded images.</p>
+                        
+                        <h3>Response</h3>
+                        <p>Returns an array of image objects:</p>
+                        
+                        <div class="response-examples">
+                            <h4>Success Response (200 OK):</h4>
+                            <pre>[
+  {
+    "id": "578c9971-29c9-4ad6-a230-f6dab05ab09c",
+    "createdAt": "2025-09-20T06:29:40.468Z",
+    "originalName": "example.jpg",
+    "mimetype": "image/jpeg",
+    "size": 51847
+  },
+  {
+    "id": "57f7cf6a-0b9d-4542-ae5c-a5f524df308e",
+    "createdAt": "2025-09-20T06:32:56.639Z",
+    "originalName": "photo.jpg",
+    "mimetype": "image/jpeg",
+    "size": 78966
+  }
+]</pre>
+                        </div>
+                        
+                        <div class="try-it">
+                            <h4>Try it</h4>
+                            <div>
+                                <button id="list-images-btn">List Images</button>
+                                <div class="result" id="list-result"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="rate-limits">
+                <h2>Rate Limiting</h2>
+                <p>
+                    Currently, TelegramPoto does not implement strict rate limiting. However, be aware of the following limitations:
+                </p>
+                <div class="params">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Limitation</th>
+                                <th>Value</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Maximum file size</td>
+                                <td>20MB</td>
+                                <td>This is a limitation of the Telegram Bot API</td>
+                            </tr>
+                            <tr>
+                                <td>Upload rate</td>
+                                <td>Approx. 20/minute</td>
+                                <td>Telegram may impose rate limits on frequent uploads</td>
+                            </tr>
+                            <tr>
+                                <td>File formats</td>
+                                <td>JPG, JPEG, PNG only</td>
+                                <td>Other image formats are not supported</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    For production use, consider implementing your own rate limiting and authentication mechanisms.
+                </p>
+            </section>
+
+            <section id="errors">
+                <h2>Error Handling</h2>
+                <p>
+                    The API uses conventional HTTP response codes to indicate the success or failure of requests.
+                    In general, codes in the 2xx range indicate success, codes in the 4xx range indicate an error
+                    in the provided information, and codes in the 5xx range indicate a server error.
+                </p>
+                
+                <h3>Common Error Codes</h3>
+                <div class="params">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>400</td>
+                                <td>Bad Request - The request was invalid or missing required parameters.</td>
+                            </tr>
+                            <tr>
+                                <td>404</td>
+                                <td>Not Found - The specified resource could not be found.</td>
+                            </tr>
+                            <tr>
+                                <td>413</td>
+                                <td>Payload Too Large - The image file size exceeds the 20MB limit.</td>
+                            </tr>
+                            <tr>
+                                <td>415</td>
+                                <td>Unsupported Media Type - The uploaded file is not a supported image format.</td>
+                            </tr>
+                            <tr>
+                                <td>500</td>
+                                <td>Internal Server Error - Something went wrong on the server.</td>
+                            </tr>
+                            <tr>
+                                <td>502</td>
+                                <td>Bad Gateway - Error communicating with Telegram API.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3>Error Response Format</h3>
+                <p>Error responses will be returned in the following format:</p>
+                <pre>{
+  "error": "Error message describing what went wrong"
+}</pre>
+            </section>
+            
+            <section id="examples">
+                <h2>Code Examples</h2>
+                
+                <h3>JavaScript/Node.js</h3>
+                <pre>// Upload an image
+const formData = new FormData();
+formData.append('image', fileInput.files[0]);
+
+fetch('https://your-domain.com/upload', {
+  method: 'POST',
+  body: formData
+})
+.then(response => response.json())
+.then(data => {
+  console.log('Success:', data);
+  const imageUrl = `https://your-domain.com${data.cdnUrl}`;
+  console.log('Image URL:', imageUrl);
+})
+.catch(error => {
+  console.error('Error:', error);
+});</pre>
+
+                <h3>Python</h3>
+                <pre>import requests
+
+# Upload an image
+url = 'https://your-domain.com/upload'
+files = {'image': open('example.jpg', 'rb')}
+
+response = requests.post(url, files=files)
+data = response.json()
+
+if response.status_code == 201:
+    print('Success:', data)
+    image_url = f"https://your-domain.com{data['cdnUrl']}"
+    print('Image URL:', image_url)
+else:
+    print('Error:', data)</pre>
+
+                <h3>PHP</h3>
+                <pre>// Upload an image
+$url = 'https://your-domain.com/upload';
+$file = new CURLFile('example.jpg', 'image/jpeg', 'example.jpg');
+
+$data = array('image' => $file);
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($httpCode == 201) {
+    $data = json_decode($response, true);
+    echo 'Success: ' . $response . "\n";
+    $imageUrl = 'https://your-domain.com' . $data['cdnUrl'];
+    echo 'Image URL: ' . $imageUrl . "\n";
+} else {
+    echo 'Error: ' . $response . "\n";
+}</pre>
+            </section>
+        </main>
+        
+        <footer>
+            <p>&copy; 2025 TelegramPoto - Free Image CDN using Telegram | <a href="/">Back to Homepage</a></p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Upload form
+            const uploadForm = document.getElementById('upload-form');
+            const uploadResult = document.getElementById('upload-result');
+            
+            uploadForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const imageInput = document.getElementById('image-input');
+                if (!imageInput.files[0]) {
+                    uploadResult.textContent = 'Please select an image file';
+                    uploadResult.style.display = 'block';
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('image', imageInput.files[0]);
+                
+                uploadResult.textContent = 'Uploading...';
+                uploadResult.style.display = 'block';
+                
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    uploadResult.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    uploadResult.textContent = 'Error: ' + error.message;
+                });
+            });
+            
+            // Get image
+            const getImageBtn = document.getElementById('get-image-btn');
+            const imageResult = document.getElementById('image-result');
+            
+            getImageBtn.addEventListener('click', function() {
+                const imageId = document.getElementById('image-id').value;
+                const imageSize = document.getElementById('image-size').value;
+                
+                if (!imageId) {
+                    imageResult.textContent = 'Please enter an image ID';
+                    imageResult.style.display = 'block';
+                    return;
+                }
+                
+                let url = `/cdn/${imageId}`;
+                if (imageSize) {
+                    url += `?size=${imageSize}`;
+                }
+                
+                imageResult.innerHTML = '';
+                imageResult.style.display = 'block';
+                
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.maxWidth = '100%';
+                img.addEventListener('load', function() {
+                    imageResult.textContent = '';
+                    imageResult.appendChild(img);
+                });
+                img.addEventListener('error', function() {
+                    imageResult.textContent = 'Error loading image. Check the ID and try again.';
+                });
+            });
+            
+            // List images
+            const listImagesBtn = document.getElementById('list-images-btn');
+            const listResult = document.getElementById('list-result');
+            
+            listImagesBtn.addEventListener('click', function() {
+                listResult.textContent = 'Loading...';
+                listResult.style.display = 'block';
+                
+                fetch('/images')
+                .then(response => response.json())
+                .then(data => {
+                    listResult.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    listResult.textContent = 'Error: ' + error.message;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

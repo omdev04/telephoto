@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TelegramPoto - Free Image & Document CDN</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            color: var(--primary-color);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .upload-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .upload-section h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        
+        .upload-container {
+            border: 2px dashed var(--primary-color);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            background-color: rgba(52, 152, 219, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-container:hover, .upload-container.dragover {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-color: var(--secondary-color);
+        }
+        
+        .upload-container i {
+            font-size: 48px;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .upload-container p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .success {
+            color: var(--success-color);
+        }
+        
+        .error {
+            color: var(--error-color);
+        }
+        
+        .preview-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .preview-section h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        
+        .preview-image {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .preview-image img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .image-links {
+            margin-top: 20px;
+        }
+        
+        .link-item {
+            margin-bottom: 15px;
+        }
+        
+        .image-links label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .image-links input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .copy-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .copy-btn:hover {
+            background-color: var(--primary-color);
+        }
+        
+        .image-card .copy-btn {
+            width: 100%;
+            margin-top: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .gallery-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .gallery-section h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .image-card {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        
+        .image-info {
+            padding: 10px;
+            background-color: white;
+        }
+        
+        .image-info h4 {
+            margin: 0;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .image-info p {
+            margin: 5px 0 0;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .upload-section, .preview-section, .gallery-section {
+                padding: 20px;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TelegramPoto</h1>
+            <p>A free image and document CDN powered by Omstack lab</p>
+        </header>
+        
+        <section class="upload-section">
+            <h2>Upload Image</h2>
+            <form id="upload-form">
+                <div class="upload-container" id="drop-area">
+                    <i>📁</i>
+                    <p>Drag & drop an image or document or click to upload</p>
+                    <input type="file" id="file-input" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp,image/bmp,image/tiff,application/pdf,image/svg+xml" />
+                    <button type="button" class="upload-btn" id="upload-btn">Choose File</button>
+                </div>
+                <div class="status" id="upload-status"></div>
+            </form>
+        </section>
+        
+        <section class="preview-section" id="preview-section">
+            <h2>Image Preview</h2>
+            <div class="preview-image" id="image-preview"></div>
+            
+            <div class="image-links">
+                <div class="link-item">
+                    <label>CDN URL:</label>
+                    <input type="text" id="cdn-link" readonly>
+                    <button class="copy-btn" data-target="cdn-link">Copy</button>
+                </div>
+                
+                <div class="link-item">
+                    <label>HTML Tag:</label>
+                    <input type="text" id="html-tag" readonly>
+                    <button class="copy-btn" data-target="html-tag">Copy</button>
+                </div>
+                
+                <div class="link-item">
+                    <label>Markdown:</label>
+                    <input type="text" id="markdown" readonly>
+                    <button class="copy-btn" data-target="markdown">Copy</button>
+                </div>
+                
+                <div class="link-item">
+                    <label>Direct Telegram CDN:</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button id="direct-cdn-btn" class="copy-btn" style="background-color: #e74c3c; margin-right: 5px;">Get Direct Link</button>
+                        <span id="direct-cdn-status" style="font-size: 12px; color: #666;"></span>
+                    </div>
+                    <div id="direct-cdn-container" style="margin-top: 10px; display: none;">
+                        <input type="text" id="direct-cdn-url" readonly>
+                        <button class="copy-btn" data-target="direct-cdn-url">Copy</button>
+                        <p style="margin-top: 5px; font-size: 11px; color: #e74c3c;">
+                            ⚠️ This URL contains a secure token with temporary access. It will expire after 1 hour.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="gallery-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Image Gallery</h2>
+                <button id="logout-btn" class="upload-btn" style="background-color: #e74c3c;">Logout</button>
+            </div>
+            <div class="loading" id="gallery-loading">Loading images...</div>
+            <div class="image-grid" id="image-grid"></div>
+        </section>
+        
+        <footer>
+            <p>&copy; 2023 TelegramPoto | <a href="/api-docs.html">API Documentation</a></p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Elements
+            const dropArea = document.getElementById('drop-area');
+            const fileInput = document.getElementById('file-input');
+            const uploadBtn = document.getElementById('upload-btn');
+            const uploadStatus = document.getElementById('upload-status');
+            const previewSection = document.getElementById('preview-section');
+            const imagePreview = document.getElementById('image-preview');
+            const cdnUrlInput = document.getElementById('cdn-link');
+            const htmlTagInput = document.getElementById('html-tag');
+            const markdownInput = document.getElementById('markdown');
+            const imageGrid = document.getElementById('image-grid');
+            const galleryLoading = document.getElementById('gallery-loading');
+            const directCdnBtn = document.getElementById('direct-cdn-btn');
+            const directCdnStatus = document.getElementById('direct-cdn-status');
+            const directCdnContainer = document.getElementById('direct-cdn-container');
+            const directCdnUrlInput = document.getElementById('direct-cdn-url');
+            const logoutBtn = document.getElementById('logout-btn');
+            
+            // Logout functionality
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to logout?')) {
+                        fetch('/api/logout', {
+                            method: 'POST'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Redirect to login page
+                                window.location.href = '/login.html';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error logging out:', error);
+                            alert('Failed to logout. Please try again.');
+                        });
+                    }
+                });
+            }
+            
+            // Direct CDN button functionality
+            if (directCdnBtn) {
+                directCdnBtn.addEventListener('click', function() {
+                    const imageId = cdnUrlInput.value.split('/').pop();
+                    
+                    if (!imageId) {
+                        directCdnStatus.textContent = 'Error: No image selected';
+                        directCdnStatus.style.color = '#e74c3c';
+                        return;
+                    }
+                    
+                    directCdnStatus.textContent = 'Fetching direct link...';
+                    directCdnStatus.style.color = '#3498db';
+                    
+                    fetch(`/direct-cdn/${imageId}/token`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Failed to get token');
+                            }
+                            return response.json();
+                        })
+                        .then(tokenData => {
+                            return fetch(`/direct-cdn/${imageId}?token=${tokenData.token}`);
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Failed to get direct CDN link');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            directCdnUrlInput.value = data.directCdnUrl;
+                            directCdnContainer.style.display = 'block';
+                            directCdnStatus.textContent = 'Direct link generated! (Valid for 1 hour)';
+                            directCdnStatus.style.color = '#27ae60';
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            directCdnStatus.textContent = 'Error: ' + error.message;
+                            directCdnStatus.style.color = '#e74c3c';
+                            directCdnContainer.style.display = 'none';
+                        });
+                });
+            }
+            
+            // Add copy functionality to all buttons with copy-btn class
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    if (!targetId) return;
+                    
+                    const inputElement = document.getElementById(targetId);
+                    if (!inputElement) return;
+                    
+                    inputElement.select();
+                    document.execCommand('copy');
+                    
+                    // Show feedback
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 1500);
+                });
+            });
+            
+            // Upload button click event
+            uploadBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            // File input change event
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    handleFile(this.files[0]);
+                }
+            });
+            
+            // Drag and drop events
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropArea.classList.add('dragover');
+            }
+            
+            function unhighlight() {
+                dropArea.classList.remove('dragover');
+            }
+            
+            dropArea.addEventListener('drop', function(e) {
+                const dt = e.dataTransfer;
+                const file = dt.files[0];
+                
+                // List of allowed MIME types - must match server config
+                const allowedTypes = [
+                    'image/jpeg',
+                    'image/png', 
+                    'image/jpg',
+                    'image/gif',
+                    'image/webp',
+                    'image/bmp',
+                    'image/tiff',
+                    'application/pdf',
+                    'image/svg+xml'
+                ];
+                
+                if (file && allowedTypes.includes(file.type)) {
+                    handleFile(file);
+                } else {
+                    uploadStatus.innerHTML = '<span class="error">Error: Please upload a supported file type (JPG, PNG, GIF, WebP, BMP, TIFF, PDF, SVG)</span>';
+                }
+            });
+            
+            // Handle file upload
+            function handleFile(file) {
+                // Update status
+                uploadStatus.innerHTML = '<span>Uploading...</span>';
+                
+                // Create form data
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                // Send upload request
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    // Check if we need authentication
+                    if (response.status === 401) {
+                        // We're not authenticated, redirect to login
+                        window.location.href = '/login.html';
+                        throw new Error('Authentication required. Please login.');
+                    }
+                    
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    
+                    // Check the content type to make sure it's JSON
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('Server returned non-JSON response');
+                    }
+                    
+                    return response.json();
+                })
+                .then(data => {
+                    // Show success message
+                    uploadStatus.innerHTML = '<span class="success">Image uploaded successfully!</span>';
+                    
+                    // Show preview section
+                    previewSection.style.display = 'block';
+                    
+                    // Set preview image
+                    imagePreview.innerHTML = `<img src="${data.cdnUrl}" alt="Uploaded Image">`;
+                    
+                    // Set links
+                    const fullUrl = window.location.origin + data.cdnUrl;
+                    cdnUrlInput.value = fullUrl;
+                    htmlTagInput.value = `<img src="${fullUrl}" alt="Hosted Image">`;
+                    markdownInput.value = `![Hosted Image](${fullUrl})`;
+                    
+                    // Reset file input
+                    fileInput.value = '';
+                    
+                    // Reload gallery
+                    loadGallery();
+                    
+                    // Scroll to preview section
+                    previewSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Reset direct CDN container
+                    directCdnContainer.style.display = 'none';
+                    directCdnStatus.textContent = '';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    uploadStatus.innerHTML = `<span class="error">Upload failed: ${error.message}</span>`;
+                });
+            }
+            
+            // Load gallery function
+            async function loadGallery() {
+                galleryLoading.style.display = 'block';
+                imageGrid.innerHTML = '';
+                
+                try {
+                    const response = await fetch('/images');
+                    
+                    // Check if authentication is required
+                    if (response.status === 401) {
+                        const authData = await response.json();
+                        if (authData.requireAuth) {
+                            // Redirect to login page
+                            window.location.href = '/login.html';
+                            return;
+                        }
+                    }
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to load gallery');
+                    }
+                    
+                    const images = await response.json();
+                    
+                    if (images.length === 0) {
+                        imageGrid.innerHTML = '<p>No images uploaded yet.</p>';
+                    } else {
+                        // Sort by creation date, newest first
+                        images.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                        
+                        images.forEach(image => {
+                            const card = document.createElement('div');
+                            card.className = 'image-card';
+                            
+                            const img = document.createElement('img');
+                            img.src = `/cdn/${image.id}`;
+                            img.alt = image.originalName;
+                            // Add a loading attribute for better user experience
+                            img.loading = 'lazy';
+                            
+                            // Add special handling for non-image documents (like PDF)
+                            if (image.mimetype && !image.mimetype.startsWith('image/')) {
+                                img.onerror = function() {
+                                    // If image fails to load (non-image document), replace with document icon
+                                    this.onerror = null;
+                                    this.src = 'data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9JzMwMHB4JyB3aWR0aD0nMzAwcHgnICBmaWxsPSIjMzQ5OGRiIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHZlcnNpb249IjEuMSIgeD0iMHB4IiB5PSIwcHgiPjxwYXRoIGQ9Ik02IDJjLTEuMSAwLTIgLjktMiAydjE2YzAgMS4xLjg5IDIgMiAyaDEyYzEuMSAwIDItLjkgMi0yVjhjMC0uNDctLjE5LS45My0uNS0xLjI1bC00LjUtNC41Yy0uMzItLjMzLS43OC0uNS0xLjI1LS41em0wIDJoN3Y1aDVWMjBINjV2LTQuNWg1VjhsLTQtNHoiPjwvcGF0aD48L3N2Zz4=';
+                                    this.style.padding = '20%';
+                                    this.style.background = '#f5f5f5';
+                                };
+                            }
+                            
+                            const info = document.createElement('div');
+                            info.className = 'image-info';
+                            
+                            const title = document.createElement('h4');
+                            title.textContent = image.originalName;
+                            
+                            const date = document.createElement('p');
+                            date.textContent = new Date(image.createdAt).toLocaleDateString();
+                            
+                            // Add file type indicator
+                            const fileType = document.createElement('p');
+                            fileType.style.fontSize = '11px';
+                            fileType.style.color = '#888';
+                            
+                            // Format mimetype for display
+                            if (image.mimetype) {
+                                const type = image.mimetype.split('/');
+                                if (type.length === 2) {
+                                    fileType.textContent = type[1].toUpperCase();
+                                } else {
+                                    fileType.textContent = image.mimetype;
+                                }
+                            } else {
+                                fileType.textContent = 'Document';
+                            }
+                            
+                            // Create Copy CDN URL button
+                            const copyBtn = document.createElement('button');
+                            copyBtn.className = 'copy-btn';
+                            copyBtn.textContent = 'Copy CDN URL';
+                            copyBtn.style.width = '100%';
+                            copyBtn.style.marginTop = '5px';
+                            
+                            // Add click event to the copy button
+                            copyBtn.addEventListener('click', (e) => {
+                                e.stopPropagation(); // Prevent card click event
+                                const fullUrl = window.location.origin + `/cdn/${image.id}`;
+                                navigator.clipboard.writeText(fullUrl)
+                                    .then(() => {
+                                        copyBtn.textContent = 'Copied!';
+                                        setTimeout(() => {
+                                            copyBtn.textContent = 'Copy CDN URL';
+                                        }, 2000);
+                                    })
+                                    .catch(err => {
+                                        console.error('Failed to copy URL: ', err);
+                                    });
+                            });
+                            
+                            // Create Delete button
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.className = 'copy-btn';
+                            deleteBtn.textContent = '🗑️ Delete';
+                            deleteBtn.style.width = '100%';
+                            deleteBtn.style.marginTop = '5px';
+                            deleteBtn.style.backgroundColor = '#e74c3c';
+                            
+                            // Add click event to the delete button
+                            deleteBtn.addEventListener('click', (e) => {
+                                e.stopPropagation(); // Prevent card click event
+                                
+                                // Confirm deletion
+                                if (confirm(`Are you sure you want to delete "${image.originalName}"?`)) {
+                                    deleteBtn.textContent = 'Deleting...';
+                                    deleteBtn.disabled = true;
+                                    
+                                    // Send delete request
+                                    fetch(`/images/${image.id}`, {
+                                        method: 'DELETE',
+                                    })
+                                    .then(response => {
+                                        // Check if we need authentication
+                                        if (response.status === 401) {
+                                            // We're not authenticated, redirect to login
+                                            window.location.href = '/login.html';
+                                            throw new Error('Authentication required. Please login.');
+                                        }
+                                        
+                                        if (!response.ok) {
+                                            throw new Error('Failed to delete image');
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        // Remove the card from the UI
+                                        card.style.opacity = '0';
+                                        setTimeout(() => {
+                                            card.remove();
+                                            
+                                            // If this was the image being previewed, clear the preview
+                                            const previewedImageId = cdnUrlInput.value.split('/').pop();
+                                            if (previewedImageId === image.id) {
+                                                previewSection.style.display = 'none';
+                                            }
+                                            
+                                            // Show message if gallery is empty
+                                            if (imageGrid.children.length === 0) {
+                                                imageGrid.innerHTML = '<p>No images uploaded yet.</p>';
+                                            }
+                                        }, 300);
+                                    })
+                                    .catch(err => {
+                                        console.error('Error deleting image:', err);
+                                        deleteBtn.textContent = '🗑️ Delete';
+                                        deleteBtn.disabled = false;
+                                        alert('Failed to delete image: ' + err.message);
+                                    });
+                                }
+                            });
+                            
+                            info.appendChild(title);
+                            info.appendChild(date);
+                            info.appendChild(fileType);  // Add file type indicator
+                            info.appendChild(copyBtn);
+                            info.appendChild(deleteBtn);
+                            
+                            card.appendChild(img);
+                            card.appendChild(info);
+                            
+                            // Image click preview functionality
+                            img.addEventListener('click', () => {
+                                // Show a larger preview
+                                imagePreview.innerHTML = '';
+                                const previewImg = document.createElement('img');
+                                previewImg.src = `/cdn/${image.id}`;
+                                previewImg.alt = image.originalName;
+                                imagePreview.appendChild(previewImg);
+                                previewSection.style.display = 'block';
+                                
+                                // Update the link values for the preview section
+                                const fullUrl = window.location.origin + `/cdn/${image.id}`;
+                                cdnUrlInput.value = fullUrl;
+                                htmlTagInput.value = `<img src="${fullUrl}" alt="Hosted Image">`;
+                                markdownInput.value = `![Hosted Image](${fullUrl})`;
+                                
+                                // Reset direct CDN container
+                                directCdnContainer.style.display = 'none';
+                                directCdnStatus.textContent = '';
+                                
+                                // Scroll to the preview section
+                                previewSection.scrollIntoView({ behavior: 'smooth' });
+                            });
+                            
+                            imageGrid.appendChild(card);
+                        });
+                    }
+                } catch (error) {
+                    imageGrid.innerHTML = '<p>Failed to load images.</p>';
+                    console.error('Error loading gallery:', error);
+                } finally {
+                    galleryLoading.style.display = 'none';
+                }
+            }
+            
+            // Load gallery on page load
+            loadGallery();
+        });
+    </script>
+</body>
+</html>

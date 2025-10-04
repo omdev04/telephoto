@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TelegramPoto - Login</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .login-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .login-section h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .login-section p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .login-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+        
+        .login-btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .login-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .success {
+            color: var(--success-color);
+        }
+        
+        .error {
+            color: var(--error-color);
+        }
+        
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="login-section">
+            <h1>Gallery Access</h1>
+            <p>Please enter the password to access the image gallery</p>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                
+                <button type="submit" class="login-btn" id="login-btn">Login</button>
+                
+                <div class="status" id="login-status"></div>
+            </form>
+            
+            <a href="/" class="back-link">Back to Home</a>
+        </section>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const loginForm = document.getElementById('login-form');
+            const passwordInput = document.getElementById('password');
+            const loginBtn = document.getElementById('login-btn');
+            const loginStatus = document.getElementById('login-status');
+            
+            // Check if already authenticated
+            fetch('/api/auth-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.isAuthenticated) {
+                        // Already logged in, redirect to main page
+                        window.location.href = '/';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking auth status:', error);
+                });
+            
+            // Handle form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const password = passwordInput.value.trim();
+                
+                if (!password) {
+                    loginStatus.innerHTML = '<span class="error">Please enter the password</span>';
+                    return;
+                }
+                
+                // Disable button and show loading state
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Logging in...';
+                loginStatus.innerHTML = '';
+                
+                // Send login request
+                fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Login successful
+                        loginStatus.innerHTML = '<span class="success">Login successful! Redirecting...</span>';
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1000);
+                    } else {
+                        // Login failed
+                        loginStatus.innerHTML = '<span class="error">Invalid password</span>';
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'Login';
+                        passwordInput.value = '';
+                        passwordInput.focus();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loginStatus.innerHTML = '<span class="error">Login failed: ' + error.message + '</span>';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Login';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

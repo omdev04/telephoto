@@ -1,0 +1,456 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TelegramPoto API",
+    "version": "1.0.0",
+    "description": "API for using Telegram as a free CDN for hosting images"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/upload": {
+      "post": {
+        "summary": "Upload an image",
+        "description": "Upload an image to Telegram and get a CDN URL",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The image file to upload"
+                  }
+                },
+                "required": ["image"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Image successfully uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Image uploaded successfully"
+                    },
+                    "imageId": {
+                      "type": "string",
+                      "example": "57f7cf6a-0b9d-4542-ae5c-a5f524df308e"
+                    },
+                    "cdnUrl": {
+                      "type": "string",
+                      "example": "/cdn/57f7cf6a-0b9d-4542-ae5c-a5f524df308e"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "No image file provided"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Failed to upload image"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cdn/{id}": {
+      "get": {
+        "summary": "Get an image by ID",
+        "description": "Retrieve an image from the CDN by its unique ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique ID of the image"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["small", "medium"]
+            },
+            "description": "The desired size of the image"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image data",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Image not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Image not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/images": {
+      "get": {
+        "summary": "List all images",
+        "description": "Get a list of all uploaded images",
+        "responses": {
+          "200": {
+            "description": "List of images",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "57f7cf6a-0b9d-4542-ae5c-a5f524df308e"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-09-20T06:32:56.639Z"
+                      },
+                      "originalName": {
+                        "type": "string",
+                        "example": "example.jpg"
+                      },
+                      "mimetype": {
+                        "type": "string",
+                        "example": "image/jpeg"
+                      },
+                      "size": {
+                        "type": "integer",
+                        "example": 78966
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/images/{id}": {
+      "delete": {
+        "summary": "Delete an image",
+        "description": "Delete an image from both Telegram (if possible) and local storage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique ID of the image to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Image deleted successfully"
+                    },
+                    "telegramDeleted": {
+                      "type": "boolean",
+                      "example": false,
+                      "description": "Whether the image was also deleted from Telegram servers"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Image not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/direct-cdn/{id}/token": {
+      "get": {
+        "summary": "Get a secure token for direct CDN access",
+        "description": "Generate a secure token for accessing the direct Telegram CDN URL",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique ID of the image"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "imageId": {
+                      "type": "string",
+                      "example": "57f7cf6a-0b9d-4542-ae5c-a5f524df308e"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "57f7cf6a-0b9d-4542-ae5c-a5f524df308e:1632149999:a1b2c3d4e5f6..."
+                    },
+                    "expiresAt": {
+                      "type": "number",
+                      "example": 1632149999
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Image not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/direct-cdn/{id}": {
+      "get": {
+        "summary": "Get direct Telegram CDN URL",
+        "description": "Retrieve the direct Telegram CDN URL for an image (requires valid token)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique ID of the image"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The security token obtained from the /direct-cdn/{id}/token endpoint"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Direct CDN URL retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "imageId": {
+                      "type": "string",
+                      "example": "57f7cf6a-0b9d-4542-ae5c-a5f524df308e"
+                    },
+                    "originalName": {
+                      "type": "string",
+                      "example": "example.jpg"
+                    },
+                    "directCdnUrl": {
+                      "type": "string",
+                      "example": "https://api.telegram.org/file/bot<TOKEN>/photos/file_123.jpg"
+                    },
+                    "note": {
+                      "type": "string",
+                      "example": "This URL contains sensitive information. Do not share and use only for direct image embedding."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid or expired token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Image not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "Image": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "originalName": {
+            "type": "string"
+          },
+          "mimetype": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
