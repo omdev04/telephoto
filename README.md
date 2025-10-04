@@ -1,10 +1,3 @@
-Perfect 🔥 — let’s make your **README.md** look like a proper open-source project with **badges**, **screenshots**, and **deploy buttons**.
-
-Here’s the upgraded version:
-
----
-
-````markdown
 # 📸 TelegramPoto - Free Image CDN Using Telegram
 
 ![Node.js](https://img.shields.io/badge/Node.js-14%2B-green?logo=node.js)  
@@ -12,34 +5,24 @@ Here’s the upgraded version:
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)  
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)  
 
-**TelegramPoto** is a lightweight web application that transforms **Telegram** into a free Content Delivery Network (CDN) for images.  
-Upload images via a simple web interface, and they are stored in a **private Telegram channel** while being served through a clean CDN endpoint.
+**TelegramPoto** is a lightweight web application that turns **Telegram** into a free Content Delivery Network (CDN) for images.  
+Upload images via a web interface — they get stored in a **private Telegram channel** and served through a clean CDN endpoint.
 
 ---
 
 ## 🚀 Features
-- ✅ **Free Image Hosting** — Leverage Telegram’s unlimited cloud storage.  
+- ✅ **Free Image Hosting** — Uses Telegram’s unlimited cloud storage.  
 - ✅ **Simple Web Interface** — Drag & drop uploader with preview.  
-- ✅ **CDN Endpoint** — Serve images via `/cdn/:id`.  
+- ✅ **CDN Endpoint** — Access images via `/cdn/:id`.  
 - ✅ **Multiple Resolutions** — Original, Medium, and Small (`?size=small|medium`).  
-- ✅ **Cache Optimized** — HTTP cache headers for blazing fast repeat loads.  
-- ✅ **File Validation** — Supports **PNG, JPG, JPEG** only.  
-- ✅ **Error Handling** — Friendly feedback with error handling.  
-
----
-
-## 📸 Screenshots
-
-### 🔼 Upload Interface
-![Upload Screenshot](https://via.placeholder.com/800x400?text=Upload+Page)
-
-### 🔗 CDN Link Preview
-![CDN Screenshot](https://via.placeholder.com/800x400?text=CDN+Endpoint+Example)
+- ✅ **Cache Optimized** — HTTP cache headers for faster loads.  
+- ✅ **File Validation** — Supports only **PNG, JPG, JPEG**.  
+- ✅ **Error Handling** — Clear user feedback & error messages.  
 
 ---
 
 ## 📦 Prerequisites
-- Node.js (v14+)  
+- Node.js (v14 or higher)  
 - A Telegram account  
 - A **Telegram Bot Token** from [@BotFather](https://t.me/botfather)  
 - A private Telegram channel with your bot as **Administrator**  
@@ -62,11 +45,14 @@ npm install
 
 ### 3. Create a Telegram Bot & Channel
 
-1. Create a bot using [@BotFather](https://t.me/botfather).
-2. Copy the **Bot Token**.
+1. Create a bot via [@BotFather](https://t.me/botfather).
+2. Save the **Bot Token**.
 3. Create a **private Telegram channel**.
-4. Add your bot as **Admin** in the channel.
-5. Get the **Channel ID** (use [@JsonDumpBot](https://t.me/JsonDumpBot) and check `forward_from_chat.id`).
+4. Add your bot as **Administrator**.
+5. Get the **Channel ID**:
+
+   * Forward any message from your channel to [@JsonDumpBot](https://t.me/JsonDumpBot).
+   * Look for `forward_from_chat.id` (e.g., `-100xxxxxxxxxx`).
 
 ### 4. Configure Environment Variables
 
@@ -84,7 +70,7 @@ PORT=3000
 npm start
 ```
 
-👉 App runs at: `http://localhost:3000`
+👉 Open: `http://localhost:3000`
 
 ---
 
@@ -93,7 +79,7 @@ npm start
 ### Uploading Images
 
 1. Open `http://localhost:3000`
-2. Drag & Drop or Select an image
+2. Drag & Drop or choose an image
 3. Click **Upload**
 4. Get preview + CDN links
 
@@ -112,7 +98,7 @@ http://localhost:3000/cdn/IMAGE_ID?size=small
 http://localhost:3000/cdn/IMAGE_ID?size=medium
 ```
 
-### HTML Example
+### Example (HTML)
 
 ```html
 <img src="http://localhost:3000/cdn/IMAGE_ID?size=medium" alt="My Image">
@@ -126,10 +112,18 @@ http://localhost:3000/cdn/IMAGE_ID?size=medium
 
 [![Deploy on Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
+```bash
+heroku login
+heroku create your-app-name
+heroku config:set BOT_TOKEN=your_telegram_bot_token
+heroku config:set CHANNEL_ID=-100xxxxxxxxxx
+git push heroku main
+```
+
 ### 🟦 DigitalOcean App Platform
 
-1. Connect your GitHub repo
-2. Add **environment variables**
+1. Connect GitHub repo → DigitalOcean App Platform
+2. Add environment variables
 3. Deploy
 
 ### 🐳 Docker
@@ -144,8 +138,8 @@ docker run -p 3000:3000 --env-file .env telegrampoto
 ## ⚠️ Limitations
 
 * Max file size: **20MB** (Telegram Bot API limit)
-* Supported formats: **PNG, JPG, JPEG** only
-* No authentication (add your own middleware if needed)
+* Supports **PNG, JPG, JPEG** only
+* No authentication (you can add middleware if needed)
 
 ---
 
@@ -158,5 +152,3 @@ docker run -p 3000:3000 --env-file .env telegrampoto
 💡 Created by **[OM SHUKLA]** — PRs and contributions welcome! 🚀
 
 ```
-
----
