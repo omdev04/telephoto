@@ -92,8 +92,9 @@ if (!fs.existsSync('uploads')) {
 
 // File filter for images and documents
 const fileFilter = (req, file, cb) => {
-  // Accept image files and some common document formats
+  // Accept image files and various document formats
   const allowedTypes = [
+    // Images
     'image/jpeg',
     'image/png', 
     'image/jpg',
@@ -101,15 +102,38 @@ const fileFilter = (req, file, cb) => {
     'image/webp',
     'image/bmp',
     'image/tiff',
-    // Allow common document types that might contain images
+    'image/svg+xml',
+    // Documents
     'application/pdf',
-    'image/svg+xml'
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+    'text/plain',
+    'text/csv',
+    'application/zip',
+    'application/x-rar-compressed',
+    'application/x-7z-compressed',
+    // Videos
+    'video/mp4',
+    'video/mpeg',
+    'video/webm',
+    'video/quicktime',
+    'video/x-msvideo', // .avi
+    // Audio
+    'audio/mpeg',
+    'audio/mp3',
+    'audio/wav',
+    'audio/ogg',
+    'audio/webm'
   ];
   
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Unsupported file type. Allowed: JPEG, PNG, GIF, WebP, BMP, TIFF, PDF, SVG'), false);
+    cb(new Error(`Unsupported file type: ${file.mimetype}. Allowed: Images, PDFs, Office docs, Videos, Audio, Archives`), false);
   }
 };
 
@@ -117,18 +141,19 @@ const upload = multer({
   storage: storage, 
   fileFilter: fileFilter,
   limits: {
-    fileSize: 20 * 1024 * 1024, // 20MB limit (Telegram bot limit)
+    fileSize: 50 * 1024 * 1024, // 50MB limit (Telegram bot document limit)
   }
 });
 
 // Routes
 // Upload route - protected by auth middleware
+// Handles images, documents, videos, audio, and archives
 app.post('/upload', requireAuth, upload.single('image'), validateImageUpload, async (req, res, next) => {
   try {
     // Upload to Telegram as document to preserve quality
     const result = await telegramService.uploadToTelegram(req.file.path);
     
-    // Store image metadata
+    // Store file metadata
     const imageId = await imageStore.saveImage({
       originalName: req.file.originalname,
       mimetype: req.file.mimetype,
@@ -146,7 +171,7 @@ app.post('/upload', requireAuth, upload.single('image'), validateImageUpload, as
     // Return success response
     res.status(201).json({
       success: true,
-      message: 'Image uploaded successfully',
+      message: 'File uploaded successfully',
       imageId: imageId,
       cdnUrl: `/cdn/${imageId}`
     });

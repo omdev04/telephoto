@@ -2,16 +2,16 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
-// Path to the JSON file storing image metadata
+// Path to the JSON file storing file metadata (images, documents, videos, etc.)
 const imagesFilePath = path.join(__dirname, '../data/images.json');
 
 /**
- * Get all images from the JSON storage
- * @returns {Promise<Array>} - Array of image objects
+ * Get all files from the JSON storage
+ * @returns {Promise<Array>} - Array of file objects
  */
 /**
- * Get all raw image data (private function for internal use)
- * @returns {Promise<Array>} - Array of complete image objects with sensitive data
+ * Get all raw file data (private function for internal use)
+ * @returns {Promise<Array>} - Array of complete file objects with sensitive data
  */
 async function _getAllImagesRaw() {
   try {
@@ -38,8 +38,8 @@ async function _getAllImagesRaw() {
 }
 
 /**
- * Get all images - public function that sanitizes sensitive data
- * @returns {Promise<Array>} - Array of sanitized image objects
+ * Get all files - public function that sanitizes sensitive data
+ * @returns {Promise<Array>} - Array of sanitized file objects
  */
 async function getAllImages() {
   try {
@@ -54,7 +54,8 @@ async function getAllImages() {
         originalName: img.originalName,
         mimetype: img.mimetype,
         size: img.size,
-        isDocument: img.isDocument || false // Include the document flag but not sensitive info
+        isDocument: img.isDocument || false, // Include the document flag but not sensitive info
+        fileType: getFileType(img.mimetype) // Add file type for easier frontend handling
         // Removed: fileId, filePath, cdnUrl which contain sensitive information
       };
     });
@@ -67,26 +68,44 @@ async function getAllImages() {
 }
 
 /**
- * Save image metadata to storage
- * @param {Object} imageData - The image metadata to save
- * @returns {Promise<string>} - The generated image ID
+ * Helper function to determine file type category from mimetype
+ * @param {string} mimetype - MIME type of the file
+ * @returns {string} - File type category
+ */
+function getFileType(mimetype) {
+  if (mimetype.startsWith('image/')) return 'image';
+  if (mimetype.startsWith('video/')) return 'video';
+  if (mimetype.startsWith('audio/')) return 'audio';
+  if (mimetype === 'application/pdf') return 'pdf';
+  if (mimetype.includes('word') || mimetype.includes('document')) return 'document';
+  if (mimetype.includes('excel') || mimetype.includes('spreadsheet')) return 'spreadsheet';
+  if (mimetype.includes('powerpoint') || mimetype.includes('presentation')) return 'presentation';
+  if (mimetype.includes('zip') || mimetype.includes('rar') || mimetype.includes('7z')) return 'archive';
+  return 'file';
+}
+
+/**
+ * Save file metadata to storage (images, documents, videos, etc.)
+ * @param {Object} imageData - The file metadata to save
+ * @returns {Promise<string>} - The generated file ID
  */
 async function saveImage(imageData) {
   try {
-    // Generate a unique ID for the image
+    // Generate a unique ID for the file
     const imageId = uuidv4();
     
-    // Get current images (use raw data)
+    // Get current files (use raw data)
     let images = await _getAllImagesRaw();
     
-    // Add the new image with ID and timestamp
+    // Add the new file with ID and timestamp
     const newImage = {
       id: imageId,
       createdAt: new Date().toISOString(),
+      fileType: getFileType(imageData.mimetype), // Add file type category
       ...imageData
     };
     
-    // Add to images array
+    // Add to files array
     images.push(newImage);
     
     // Write back to the file
@@ -94,30 +113,30 @@ async function saveImage(imageData) {
     
     return imageId;
   } catch (error) {
-    console.error('Error saving image metadata:', error);
-    throw new Error('Failed to save image metadata');
+    console.error('Error saving file metadata:', error);
+    throw new Error('Failed to save file metadata');
   }
 }
 
 /**
- * Get image by ID from storage
- * @param {string} id - The image ID to look for
+ * Get file by ID from storage
+ * @param {string} id - The file ID to look for
  * @param {boolean} raw - If true, returns the unsanitized data with sensitive info (for internal use)
- * @returns {Promise<Object|null>} - The image object or null if not found
+ * @returns {Promise<Object|null>} - The file object or null if not found
  */
 async function getImageById(id, raw = false) {
   try {
     const images = raw ? await _getAllImagesRaw() : await getAllImages();
     return images.find(img => img.id === id) || null;
   } catch (error) {
-    console.error('Error fetching image by ID:', error);
-    throw new Error('Failed to retrieve image');
+    console.error('Error fetching file by ID:', error);
+    throw new Error('Failed to retrieve file');
   }
 }
 
 /**
- * Delete image by ID from storage
- * @param {string} id - The image ID to delete
+ * Delete file by ID from storage
+ * @param {string} id - The file ID to delete
  * @returns {Promise<boolean>} - True if deleted, false if not found
  */
 async function deleteImage(id) {
@@ -125,10 +144,10 @@ async function deleteImage(id) {
     let images = await _getAllImagesRaw();
     const initialLength = images.length;
     
-    // Filter out the image with the given ID
+    // Filter out the file with the given ID
     images = images.filter(img => img.id !== id);
     
-    // If no image was removed, return false
+    // If no file was removed, return false
     if (images.length === initialLength) {
       return false;
     }
@@ -137,8 +156,8 @@ async function deleteImage(id) {
     fs.writeFileSync(imagesFilePath, JSON.stringify({ images }, null, 2));
     return true;
   } catch (error) {
-    console.error('Error deleting image:', error);
-    throw new Error('Failed to delete image');
+    console.error('Error deleting file:', error);
+    throw new Error('Failed to delete file');
   }
 }
 

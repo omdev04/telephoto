@@ -300,12 +300,13 @@
         </header>
         
         <section class="upload-section">
-            <h2>Upload Image</h2>
+            <h2>Upload File (Images, Documents, Videos, Audio)</h2>
             <form id="upload-form">
                 <div class="upload-container" id="drop-area">
                     <i>📁</i>
-                    <p>Drag & drop an image or document or click to upload</p>
-                    <input type="file" id="file-input" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp,image/bmp,image/tiff,application/pdf,image/svg+xml" />
+                    <p>Drag & drop a file or click to upload</p>
+                    <p style="font-size: 0.9em; color: #999;">Supported: Images, PDFs, Office docs, Videos, Audio, Archives (max 50MB)</p>
+                    <input type="file" id="file-input" accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/csv,application/zip,application/x-rar-compressed,application/x-7z-compressed,video/*,audio/*" />
                     <button type="button" class="upload-btn" id="upload-btn">Choose File</button>
                 </div>
                 <div class="status" id="upload-status"></div>
@@ -518,21 +519,29 @@
                 
                 // List of allowed MIME types - must match server config
                 const allowedTypes = [
-                    'image/jpeg',
-                    'image/png', 
-                    'image/jpg',
-                    'image/gif',
-                    'image/webp',
-                    'image/bmp',
-                    'image/tiff',
-                    'application/pdf',
-                    'image/svg+xml'
+                    // Images
+                    'image/jpeg', 'image/png', 'image/jpg', 'image/gif',
+                    'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml',
+                    // Documents
+                    'application/pdf', 'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'text/plain', 'text/csv',
+                    // Archives
+                    'application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed',
+                    // Videos
+                    'video/mp4', 'video/mpeg', 'video/webm', 'video/quicktime', 'video/x-msvideo',
+                    // Audio
+                    'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm'
                 ];
                 
                 if (file && allowedTypes.includes(file.type)) {
                     handleFile(file);
                 } else {
-                    uploadStatus.innerHTML = '<span class="error">Error: Please upload a supported file type (JPG, PNG, GIF, WebP, BMP, TIFF, PDF, SVG)</span>';
+                    uploadStatus.innerHTML = '<span class="error">Error: Unsupported file type. Supported: Images, PDFs, Office docs, Videos, Audio, Archives</span>';
                 }
             });
             
@@ -572,19 +581,70 @@
                 })
                 .then(data => {
                     // Show success message
-                    uploadStatus.innerHTML = '<span class="success">Image uploaded successfully!</span>';
+                    uploadStatus.innerHTML = '<span class="success">File uploaded successfully!</span>';
                     
                     // Show preview section
                     previewSection.style.display = 'block';
                     
-                    // Set preview image
-                    imagePreview.innerHTML = `<img src="${data.cdnUrl}" alt="Uploaded Image">`;
+                    // Set preview based on file type
+                    const fileName = file.name.toLowerCase();
+                    const isImage = file.type.startsWith('image/');
+                    const isVideo = file.type.startsWith('video/');
+                    const isAudio = file.type.startsWith('audio/');
+                    const isPDF = file.type === 'application/pdf';
+                    
+                    if (isImage) {
+                        imagePreview.innerHTML = `<img src="${data.cdnUrl}" alt="Uploaded Image">`;
+                    } else if (isVideo) {
+                        imagePreview.innerHTML = `
+                            <video controls style="max-width: 100%; max-height: 400px;">
+                                <source src="${data.cdnUrl}" type="${file.type}">
+                                Your browser does not support the video tag.
+                            </video>
+                            <p style="margin-top: 10px;">📹 Video: ${file.name}</p>
+                        `;
+                    } else if (isAudio) {
+                        imagePreview.innerHTML = `
+                            <audio controls style="width: 100%;">
+                                <source src="${data.cdnUrl}" type="${file.type}">
+                                Your browser does not support the audio tag.
+                            </audio>
+                            <p style="margin-top: 10px;">🎵 Audio: ${file.name}</p>
+                        `;
+                    } else if (isPDF) {
+                        imagePreview.innerHTML = `
+                            <div style="text-align: center; padding: 20px;">
+                                <div style="font-size: 64px;">📄</div>
+                                <p style="margin-top: 10px;">PDF Document: ${file.name}</p>
+                                <a href="${data.cdnUrl}" target="_blank" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 4px;">View PDF</a>
+                            </div>
+                        `;
+                    } else {
+                        // Generic document preview
+                        const icon = fileName.endsWith('.zip') || fileName.endsWith('.rar') || fileName.endsWith('.7z') ? '📦' :
+                                   fileName.endsWith('.doc') || fileName.endsWith('.docx') ? '📝' :
+                                   fileName.endsWith('.xls') || fileName.endsWith('.xlsx') ? '📊' :
+                                   fileName.endsWith('.ppt') || fileName.endsWith('.pptx') ? '📊' : '📄';
+                        imagePreview.innerHTML = `
+                            <div style="text-align: center; padding: 20px;">
+                                <div style="font-size: 64px;">${icon}</div>
+                                <p style="margin-top: 10px;">Document: ${file.name}</p>
+                                <a href="${data.cdnUrl}" target="_blank" download style="display: inline-block; margin-top: 10px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 4px;">Download</a>
+                            </div>
+                        `;
+                    }
                     
                     // Set links
                     const fullUrl = window.location.origin + data.cdnUrl;
                     cdnUrlInput.value = fullUrl;
-                    htmlTagInput.value = `<img src="${fullUrl}" alt="Hosted Image">`;
-                    markdownInput.value = `![Hosted Image](${fullUrl})`;
+                    
+                    if (isImage) {
+                        htmlTagInput.value = `<img src="${fullUrl}" alt="Hosted Image">`;
+                        markdownInput.value = `![Hosted Image](${fullUrl})`;
+                    } else {
+                        htmlTagInput.value = `<a href="${fullUrl}">${file.name}</a>`;
+                        markdownInput.value = `[${file.name}](${fullUrl})`;
+                    }
                     
                     // Reset file input
                     fileInput.value = '';

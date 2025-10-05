@@ -1,6 +1,6 @@
 {
   "name": "telegrampoto",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A system that uses Telegram as a free CDN for hosting images",
   "main": "server.js",
   "scripts": {

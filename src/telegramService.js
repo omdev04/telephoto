@@ -154,6 +154,7 @@ function getMimeType(filePath) {
   const extension = path.extname(filePath).toLowerCase();
   
   switch (extension) {
+    // Images
     case '.jpg':
     case '.jpeg':
       return 'image/jpeg';
@@ -170,8 +171,56 @@ function getMimeType(filePath) {
       return 'image/tiff';
     case '.svg':
       return 'image/svg+xml';
+    
+    // Documents
     case '.pdf':
       return 'application/pdf';
+    case '.doc':
+      return 'application/msword';
+    case '.docx':
+      return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    case '.xls':
+      return 'application/vnd.ms-excel';
+    case '.xlsx':
+      return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    case '.ppt':
+      return 'application/vnd.ms-powerpoint';
+    case '.pptx':
+      return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+    case '.txt':
+      return 'text/plain';
+    case '.csv':
+      return 'text/csv';
+    
+    // Archives
+    case '.zip':
+      return 'application/zip';
+    case '.rar':
+      return 'application/x-rar-compressed';
+    case '.7z':
+      return 'application/x-7z-compressed';
+    
+    // Videos
+    case '.mp4':
+      return 'video/mp4';
+    case '.mpeg':
+    case '.mpg':
+      return 'video/mpeg';
+    case '.webm':
+      return 'video/webm';
+    case '.mov':
+      return 'video/quicktime';
+    case '.avi':
+      return 'video/x-msvideo';
+    
+    // Audio
+    case '.mp3':
+      return 'audio/mpeg';
+    case '.wav':
+      return 'audio/wav';
+    case '.ogg':
+      return 'audio/ogg';
+    
     default:
       return 'application/octet-stream'; // Default content type
   }
