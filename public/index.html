@@ -559,16 +559,12 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(response => {
+                .then(async response => {
                     // Check if we need authentication
                     if (response.status === 401) {
                         // We're not authenticated, redirect to login
                         window.location.href = '/login.html';
                         throw new Error('Authentication required. Please login.');
-                    }
-                    
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
                     }
                     
                     // Check the content type to make sure it's JSON
@@ -577,7 +573,15 @@
                         throw new Error('Server returned non-JSON response');
                     }
                     
-                    return response.json();
+                    const data = await response.json();
+                    
+                    // Check if the response is not ok (400, 500, etc.)
+                    if (!response.ok) {
+                        // Throw an error with the server's error message
+                        throw new Error(data.error || data.details || 'Upload failed');
+                    }
+                    
+                    return data;
                 })
                 .then(data => {
                     // Show success message
