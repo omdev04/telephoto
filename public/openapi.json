@@ -2,8 +2,8 @@
   "openapi": "3.0.0",
   "info": {
     "title": "TelegramPoto API",
-    "version": "1.0.0",
-    "description": "API for using Telegram as a free CDN for hosting images"
+    "version": "2.0.0",
+    "description": "API for using Telegram as a free CDN for hosting images, documents, videos, audio, and archives"
   },
   "servers": [
     {
@@ -14,8 +14,8 @@
   "paths": {
     "/upload": {
       "post": {
-        "summary": "Upload an image",
-        "description": "Upload an image to Telegram and get a CDN URL",
+        "summary": "Upload a file",
+        "description": "Upload a file (image, document, video, audio, or archive) to Telegram and get a CDN URL. Supported formats: Images (JPEG, PNG, GIF, WebP, BMP, TIFF, SVG), Documents (PDF, Word, Excel, PowerPoint, TXT, CSV), Videos (MP4, MPEG, WebM, MOV, AVI), Audio (MP3, WAV, OGG), Archives (ZIP, RAR, 7Z). Max file size: 50MB.",
         "requestBody": {
           "required": true,
           "content": {
@@ -26,7 +26,7 @@
                   "image": {
                     "type": "string",
                     "format": "binary",
-                    "description": "The image file to upload"
+                    "description": "The file to upload (despite the parameter name, it accepts all supported file types)"
                   }
                 },
                 "required": ["image"]
@@ -36,7 +36,7 @@
         },
         "responses": {
           "201": {
-            "description": "Image successfully uploaded",
+            "description": "File successfully uploaded",
             "content": {
               "application/json": {
                 "schema": {
@@ -48,7 +48,7 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Image uploaded successfully"
+                      "example": "File uploaded successfully"
                     },
                     "imageId": {
                       "type": "string",
@@ -64,7 +64,7 @@
             }
           },
           "400": {
-            "description": "Bad request",
+            "description": "Bad request - Invalid file or unsupported file type",
             "content": {
               "application/json": {
                 "schema": {
@@ -72,7 +72,31 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "example": "No image file provided"
+                      "example": "Unsupported file type. Allowed: Images, PDFs, Office docs, Videos, Audio, Archives"
+                    },
+                    "code": {
+                      "type": "string",
+                      "example": "UNSUPPORTED_FILE_TYPE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Authentication required"
+                    },
+                    "requireAuth": {
+                      "type": "boolean",
+                      "example": true
                     }
                   }
                 }
@@ -100,8 +124,8 @@
     },
     "/cdn/{id}": {
       "get": {
-        "summary": "Get an image by ID",
-        "description": "Retrieve an image from the CDN by its unique ID",
+        "summary": "Get a file by ID",
+        "description": "Retrieve a file (image, document, video, audio, or archive) from the CDN by its unique ID",
         "parameters": [
           {
             "name": "id",
@@ -110,7 +134,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The unique ID of the image"
+            "description": "The unique ID of the file"
           },
           {
             "name": "size",
@@ -118,16 +142,34 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["small", "medium"]
+              "enum": ["small", "medium", "original"]
             },
-            "description": "The desired size of the image"
+            "description": "The desired size of the file (primarily for images)"
           }
         ],
         "responses": {
           "200": {
-            "description": "Image data",
+            "description": "File data",
             "content": {
               "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/*": {
                 "schema": {
                   "type": "string",
                   "format": "binary"
@@ -136,7 +178,7 @@
             }
           },
           "404": {
-            "description": "Image not found",
+            "description": "File not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -156,11 +198,11 @@
     },
     "/images": {
       "get": {
-        "summary": "List all images",
-        "description": "Get a list of all uploaded images",
+        "summary": "List all files",
+        "description": "Get a list of all uploaded files (images, documents, videos, audio, archives)",
         "responses": {
           "200": {
-            "description": "List of images",
+            "description": "List of files",
             "content": {
               "application/json": {
                 "schema": {
@@ -188,7 +230,36 @@
                       "size": {
                         "type": "integer",
                         "example": 78966
+                      },
+                      "isDocument": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "fileType": {
+                        "type": "string",
+                        "enum": ["image", "video", "audio", "pdf", "document", "spreadsheet", "presentation", "archive", "file"],
+                        "example": "image"
                       }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Authentication required"
+                    },
+                    "requireAuth": {
+                      "type": "boolean",
+                      "example": true
                     }
                   }
                 }
@@ -200,8 +271,8 @@
     },
     "/images/{id}": {
       "delete": {
-        "summary": "Delete an image",
-        "description": "Delete an image from both Telegram (if possible) and local storage",
+        "summary": "Delete a file",
+        "description": "Delete a file from both Telegram (if possible) and local storage",
         "parameters": [
           {
             "name": "id",

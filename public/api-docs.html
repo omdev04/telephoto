@@ -292,16 +292,16 @@
     <div class="container">
         <header>
             <h1>TelegramPoto API Documentation</h1>
-            <p>Use Telegram as a free image CDN for your applications</p>
+            <p>Use Telegram as a free CDN for images, documents, videos, audio, and archives</p>
         </header>
         
         <nav>
             <ul>
                 <li><a href="#introduction">Introduction</a></li>
                 <li><a href="#authentication">Authentication</a></li>
-                <li><a href="#upload-image">Upload Image</a></li>
-                <li><a href="#get-image">Get Image</a></li>
-                <li><a href="#list-images">List Images</a></li>
+                <li><a href="#upload-file">Upload File</a></li>
+                <li><a href="#get-file">Get File</a></li>
+                <li><a href="#list-files">List Files</a></li>
                 <li><a href="#rate-limits">Rate Limiting</a></li>
                 <li><a href="#errors">Error Handling</a></li>
                 <li><a href="#examples">Code Examples</a></li>
@@ -313,10 +313,19 @@
             <section id="introduction">
                 <h2>Introduction</h2>
                 <p>
-                    TelegramPoto is a RESTful API that allows you to use Telegram as a free image CDN. It provides endpoints for uploading images,
-                    retrieving them, and managing your image collection. All API responses are in JSON format, except for the image retrieval endpoint,
-                    which returns the image data directly.
+                    TelegramPoto is a RESTful API that allows you to use Telegram as a free CDN for hosting various types of files. 
+                    It provides endpoints for uploading files, retrieving them, and managing your file collection. All API responses are in JSON format, 
+                    except for the file retrieval endpoint, which returns the file data directly.
                 </p>
+                <p><strong>Supported File Types:</strong></p>
+                <ul>
+                    <li>📸 <strong>Images:</strong> JPEG, PNG, GIF, WebP, BMP, TIFF, SVG</li>
+                    <li>📄 <strong>Documents:</strong> PDF, Word (.doc, .docx), Excel (.xls, .xlsx), PowerPoint (.ppt, .pptx), TXT, CSV</li>
+                    <li>🎬 <strong>Videos:</strong> MP4, MPEG, WebM, MOV, AVI</li>
+                    <li>🎵 <strong>Audio:</strong> MP3, WAV, OGG, WebM</li>
+                    <li>📦 <strong>Archives:</strong> ZIP, RAR, 7Z</li>
+                </ul>
+                <p><strong>File Size Limit:</strong> 50MB per file</p>
                 <p>
                     The base URL for all API endpoints is: <code>http://your-domain.com</code> (replace with your actual domain)
                 </p>
@@ -331,23 +340,23 @@
             <section id="authentication">
                 <h2>Authentication</h2>
                 <p>
-                    Currently, the API doesn't require authentication. However, for production use, it's recommended to implement your own
-                    authentication mechanism to protect your uploads.
+                    The API requires session-based authentication. Users must log in through the web interface before uploading or managing files.
+                    API endpoints will return a 401 status code if authentication is required.
                 </p>
             </section>
             
-            <section id="upload-image">
-                <h2>Upload Image</h2>
+            <section id="upload-file">
+                <h2>Upload File</h2>
                 <div class="endpoint">
                     <div class="endpoint-header">
                         <div class="method post">POST</div>
                         <div class="endpoint-url">/upload</div>
                     </div>
                     <div class="endpoint-body">
-                        <p>Upload a new image to the CDN.</p>
+                        <p>Upload a new file (image, document, video, audio, or archive) to the CDN.</p>
                         
                         <h3>Request</h3>
-                        <p>The request must be a <code>multipart/form-data</code> request with an image file:</p>
+                        <p>The request must be a <code>multipart/form-data</code> request with a file:</p>
                         
                         <div class="params">
                             <table>
@@ -362,7 +371,7 @@
                                     <tr>
                                         <td>image <span class="tag tag-required">Required</span></td>
                                         <td>File</td>
-                                        <td>The image file to upload. Must be a valid image (JPG, JPEG, or PNG) and less than 20MB.</td>
+                                        <td>The file to upload. Supports images, documents, videos, audio, and archives. Max 50MB.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -375,16 +384,28 @@
                             <h4>Success Response (201 Created):</h4>
                             <pre>{
   "success": true,
-  "message": "Image uploaded successfully",
+  "message": "File uploaded successfully",
   "imageId": "57f7cf6a-0b9d-4542-ae5c-a5f524df308e",
   "cdnUrl": "/cdn/57f7cf6a-0b9d-4542-ae5c-a5f524df308e"
+}</pre>
+
+                            <h4>Error Response (400 Bad Request):</h4>
+                            <pre>{
+  "error": "Unsupported file type. Allowed: Images, PDFs, Office docs, Videos, Audio, Archives",
+  "code": "UNSUPPORTED_FILE_TYPE"
+}</pre>
+
+                            <h4>Error Response (401 Unauthorized):</h4>
+                            <pre>{
+  "error": "Authentication required",
+  "requireAuth": true
 }</pre>
                         </div>
                         
                         <div class="try-it">
                             <h4>Try it</h4>
                             <form id="upload-form">
-                                <input type="file" id="image-input" accept="image/jpeg,image/jpg,image/png">
+                                <input type="file" id="image-input" accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,video/*,audio/*">
                                 <button type="submit">Upload</button>
                                 <div class="result" id="upload-result"></div>
                             </form>
@@ -393,15 +414,15 @@
                 </div>
             </section>
             
-            <section id="get-image">
-                <h2>Get Image</h2>
+            <section id="get-file">
+                <h2>Get File</h2>
                 <div class="endpoint">
                     <div class="endpoint-header">
                         <div class="method get">GET</div>
                         <div class="endpoint-url">/cdn/:id</div>
                     </div>
                     <div class="endpoint-body">
-                        <p>Retrieve an image by its ID.</p>
+                        <p>Retrieve a file by its ID.</p>
                         
                         <h3>Path Parameters</h3>
                         <div class="params">
@@ -417,7 +438,7 @@
                                     <tr>
                                         <td>id <span class="tag tag-required">Required</span></td>
                                         <td>String</td>
-                                        <td>The unique ID of the image.</td>
+                                        <td>The unique ID of the file.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -437,7 +458,7 @@
                                     <tr>
                                         <td>size <span class="tag tag-optional">Optional</span></td>
                                         <td>String</td>
-                                        <td>The desired size of the image: "small", "medium", or omit for original size.</td>
+                                        <td>The desired size (for images only): "small", "medium", or omit for original size.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -463,18 +484,18 @@
                 </div>
             </section>
             
-            <section id="list-images">
-                <h2>List Images</h2>
+            <section id="list-files">
+                <h2>List Files</h2>
                 <div class="endpoint">
                     <div class="endpoint-header">
                         <div class="method get">GET</div>
                         <div class="endpoint-url">/images</div>
                     </div>
                     <div class="endpoint-body">
-                        <p>Get a list of all uploaded images.</p>
+                        <p>Get a list of all uploaded files.</p>
                         
                         <h3>Response</h3>
-                        <p>Returns an array of image objects:</p>
+                        <p>Returns an array of file objects:</p>
                         
                         <div class="response-examples">
                             <h4>Success Response (200 OK):</h4>
@@ -484,14 +505,18 @@
     "createdAt": "2025-09-20T06:29:40.468Z",
     "originalName": "example.jpg",
     "mimetype": "image/jpeg",
-    "size": 51847
+    "size": 51847,
+    "isDocument": true,
+    "fileType": "image"
   },
   {
     "id": "57f7cf6a-0b9d-4542-ae5c-a5f524df308e",
     "createdAt": "2025-09-20T06:32:56.639Z",
-    "originalName": "photo.jpg",
-    "mimetype": "image/jpeg",
-    "size": 78966
+    "originalName": "document.pdf",
+    "mimetype": "application/pdf",
+    "size": 245678,
+    "isDocument": true,
+    "fileType": "pdf"
   }
 ]</pre>
                         </div>
@@ -499,7 +524,7 @@
                         <div class="try-it">
                             <h4>Try it</h4>
                             <div>
-                                <button id="list-images-btn">List Images</button>
+                                <button id="list-images-btn">List Files</button>
                                 <div class="result" id="list-result"></div>
                             </div>
                         </div>
@@ -524,8 +549,8 @@
                         <tbody>
                             <tr>
                                 <td>Maximum file size</td>
-                                <td>20MB</td>
-                                <td>This is a limitation of the Telegram Bot API</td>
+                                <td>50MB</td>
+                                <td>This is a limitation of the Telegram Bot API for documents</td>
                             </tr>
                             <tr>
                                 <td>Upload rate</td>
