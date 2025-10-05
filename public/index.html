@@ -368,7 +368,24 @@
     </div>
     
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", async function() {
+            // Check authentication status first
+            try {
+                const authResponse = await fetch('/api/auth-status');
+                const authData = await authResponse.json();
+                
+                if (!authData.isAuthenticated) {
+                    // Not authenticated, redirect to login
+                    window.location.href = '/login.html';
+                    return; // Stop execution
+                }
+            } catch (error) {
+                console.error('Error checking authentication:', error);
+                // On error, redirect to login to be safe
+                window.location.href = '/login.html';
+                return;
+            }
+            
             // Elements
             const dropArea = document.getElementById('drop-area');
             const fileInput = document.getElementById('file-input');
